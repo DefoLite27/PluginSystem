@@ -1,0 +1,8 @@
+{
+    "loaderVersion": "1.0",
+    "name": "templatePlugin",
+    "visualName": "Template Plugin",
+    "version": "1.0",
+    "dependencies": ["ppp"],
+    "enabled": true
+}
