@@ -1,14 +1,11 @@
 from pathlib import Path
 import builtins
-import os
 
 from ..jsonFunctions import getJsonData
-from ..API import API
+from .API import API
 from ..logger import info, warn, success, error
 from ..EventHandler import BindableEvent
 import threading
-
-# 
 
 class PluginManager:
     def __init__(self):

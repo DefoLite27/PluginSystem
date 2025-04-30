@@ -1,10 +1,30 @@
 {
-    "loaderVersion": 0.9,
+    "loaderVersion": 1.1,
     "name": "secondTemplatePlugin",
     "visualName": "Template Plugin2",
     "version": 1.0,
     "dependencies": {
        
     },
-    "enabled": true
+    "enabled": true,
+
+    "options": {
+        "option1": {
+            "visualName": "Test Option 1",
+            "type": "boolean",
+            "description": "This is a boolean option",
+            "value": true
+        },
+        "option2": {
+            "visualName": "Test Option 2",
+            "type": "selector",
+            "selectOptions": [
+                "Option 1",
+                "Option 2",
+                "Option 3"
+            ],
+            "description": "This is a string option",
+            "value": "Option1"
+        }
+    }
 }

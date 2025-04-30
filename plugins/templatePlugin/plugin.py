@@ -10,5 +10,8 @@ class Plugin(Plugin):
     def start(self):
         self.API.getPlugin("secondTemplatePlugin").testFunction()
 
+    def optionsChanged(self, optionName, optionArgs):
+        print(optionName, optionArgs)
+
     def onRemove(self):
         pass

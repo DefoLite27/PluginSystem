@@ -1,10 +1,19 @@
 {
-    "loaderVersion": 1.0,
+    "loaderVersion": 1.1,
     "name": "templatePlugin",
     "visualName": "Template Plugin",
     "version": 1.0,
     "dependencies": {
         "secondTemplatePlugin": 1.0
     },
-    "enabled": true
+    "enabled": true,
+
+    "options": {
+        "option1": {
+            "visualName": "Test Option 1 in Template Plugin",
+            "type": "boolean",
+            "description": "BOOOOOOLLLL",
+            "value": true
+        }
+    }
 }

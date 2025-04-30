@@ -8,7 +8,10 @@ class Plugin(Plugin):
         pass
 
     def start(self):
-        pass
+        self.API.changePluginOptions(self.API.getPlugin("secondTemplatePlugin"), "option2", {"value": "Option 2"})
+    
+    def optionsChanged(self, optionName, optionArgs):
+        print(optionName, optionArgs)
 
     def testFunction(self):
         print("Test function from secondTemplatePlugin")

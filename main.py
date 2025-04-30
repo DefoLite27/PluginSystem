@@ -13,4 +13,4 @@ if __name__ == "__main__":
     pluginMan.startPlugins()
 
 
-# Upload to GitHub
+# Standartisize plugin option system
