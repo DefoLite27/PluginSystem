@@ -1,0 +1,10 @@
+{
+    "loaderVersion": 0.9,
+    "name": "secondTemplatePlugin",
+    "visualName": "Template Plugin2",
+    "version": 1.0,
+    "dependencies": {
+       
+    },
+    "enabled": true
+}

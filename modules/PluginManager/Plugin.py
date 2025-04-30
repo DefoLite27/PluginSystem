@@ -7,10 +7,8 @@ class Plugin:
         self.loaded = False
         self.started = False
 
-    def init(self, currentPath):
-        self.currentPath = currentPath
-
+    def init(self):
         self.configData = getJsonData(os.path.join(self.currentPath, 'config.json'))
 
     def cleanUp(self):
-        pass
+        self.loaded = False

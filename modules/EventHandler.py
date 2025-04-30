@@ -1,14 +1,13 @@
 import multiprocessing
 import threading
 import random
+import time
 
 closing = False
 
-def createSharedEvents(eventNameArray):
+def createSharedEvents(): # This is allows events to be shared between processes
     manager = multiprocessing.Manager()
     newDict = {}
-    for v in eventNameArray:
-        newDict[v] = [manager.Event(), manager.dict()]
     
     def on_exit():
         global closing
@@ -20,6 +19,15 @@ def createSharedEvents(eventNameArray):
     atexit.register(on_exit)
 
     return newDict, manager
+
+def addSharedEvent(sharedEventData, newEventName):
+    if sharedEventData[1] is None:
+        raise ValueError("Manager is None. Cannot add new event.")
+    
+    if newEventName in sharedEventData:
+        raise ValueError(f"Event \"{newEventName}\" already exists.")
+    
+    sharedEventData[0][newEventName] = [sharedEventData[1].Event(), sharedEventData[1].dict()]
 
 class Connection:
     def __init__(self, event, func, once = False):
@@ -39,7 +47,16 @@ class Connection:
         self._event._Disconnect(self)
 
 class BindableEvent:
-    def __init__(self, shared, key):
+    def __init__(self, sharedEventData, key):
+        try:
+            addSharedEvent(sharedEventData, key)
+        except ValueError:
+            pass
+
+        shared = sharedEventData[0]
+
+        self.connections = 0
+        self._sharedEventData = sharedEventData
         self._listening = True
         self._listeners = []
         self._event = shared[key][0]
@@ -56,6 +73,9 @@ class BindableEvent:
 
         con = Connection(self, function, once)
         self._listeners.append(con)
+
+        self.connections += 1
+
         return con
 
     def Fire(self, *args):
@@ -68,6 +88,7 @@ class BindableEvent:
 
     def _Disconnect(self, connection):
         if connection in self._listeners:
+            self.connections -= 1
             self._listeners.remove(connection)
         if len(self._listeners) == 0:
             self.unListen()
@@ -88,8 +109,23 @@ class BindableEvent:
             self._listen_thread = threading.Thread(target=loop, daemon=True)
             self._listen_thread.start()
 
+    def destroy(self):
+        """
+        Clean up all resources associated with this BindableEvent.
+        """
+        # Stop listening and terminate the listener thread
+        self.unListen()
+
+        # Disconnect all listeners
+        self._listeners.clear()
+        self.connections = 0
+
+        # Clear shared data
+        self._shared_data.clear()
+
     def unListen(self):
         self._listening = False
+        self._event.set() 
 
 class ThreadSafeDict:
     def __init__(self):
@@ -117,6 +153,9 @@ class ThreadSafeDict:
             if key in self.dictionary:
                 del self.dictionary[key]
 
+
+
+    
 # Usage example
 """
 def listener_function(*shared_data):
@@ -124,18 +163,18 @@ def listener_function(*shared_data):
 
 def fire_event(shared):
     print(f"Firing events from workers...")
-    be = BindableEvent(shared, "a")
+    be = BindableEvent([shared, None], "a")
     time.sleep(1)
     be.Fire("Hello", "from", "worker")
     be.unListen()
 
 if __name__ == "__main__":
-    shared, manager = createSharedEvents(["a", "b"])
+    shared = createSharedEvents()
 
     be = BindableEvent(shared, "a")
     be.Connect(listener_function)
 
-    p = multiprocessing.Process(target=fire_event, args=(shared,))
+    p = multiprocessing.Process(target=fire_event, args=(shared[0],))
     p.start()
 
     time.sleep(3)

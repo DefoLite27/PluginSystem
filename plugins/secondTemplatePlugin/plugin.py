@@ -8,7 +8,10 @@ class Plugin(Plugin):
         pass
 
     def start(self):
-        self.API.getPlugin("secondTemplatePlugin").testFunction()
+        pass
+
+    def testFunction(self):
+        print("Test function from secondTemplatePlugin")
 
     def onRemove(self):
         pass
