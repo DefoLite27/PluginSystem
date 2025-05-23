@@ -1,11 +1,12 @@
 from pathlib import Path
 import builtins
+import threading
+import traceback
 
 from ..jsonFunctions import getJsonData
 from .API import API
 from ..logger import info, warn, success, error
 from ..EventHandler import BindableEvent
-import threading
 
 class PluginManager:
     def __init__(self):
@@ -16,15 +17,27 @@ class PluginManager:
         self.events = {
             "OnPluginRemove": BindableEvent(builtins.sharedEventData, "OnPluginRemove"),
         }
+        self.pluginFolderList = []
 
         self.api = API(self)
 
     def loadPlugins(self):
         info("Loading plugins.")
 
-        for pluginFolder in self.pluginsFolder.iterdir():
-            if pluginFolder.is_dir() and (pluginFolder / 'plugin.py').exists():
-                self._loadPlugin(pluginFolder)
+        self._updatePluginFolderList()
+        for pluginFolder in self.pluginFolderList:
+            self._loadPlugin(pluginFolder)
+    
+    def _updatePluginFolderList(self):
+        self.pluginFolderList = []
+        def loadFolder(folder):
+            for pluginFolder in folder.iterdir():
+                if pluginFolder.is_dir():
+                    if (pluginFolder / 'plugin.py').exists():
+                        self.pluginFolderList.append(pluginFolder)
+                    else:
+                        loadFolder(pluginFolder)
+        loadFolder(self.pluginsFolder)
 
     def _loadPlugin(self, pluginFolder):
         pluginData = getJsonData(pluginFolder / 'config.json')
@@ -47,7 +60,7 @@ class PluginManager:
         dependecies = pluginData['dependencies']
         def addDependencies(pluginFolder):
             PluginData = getJsonData(pluginFolder / "config.json")
-            for p in self.pluginsFolder.iterdir():
+            for p in self.pluginFolderList:
                 dependencyData =  getJsonData(p / "config.json")
                 if dependencyData['name'] in PluginData['dependencies'] and not dependencyData['name'] in dependecies:
                     dependecies.append(dependencyData['name'])
@@ -55,12 +68,12 @@ class PluginManager:
         addDependencies(pluginFolder)
                 
         for dependency in dependecies:
-            if not any(getJsonData(p / "config.json")['name'] == dependency for p in self.pluginsFolder.iterdir()):
+            if not any(getJsonData(p / "config.json")['name'] == dependency for p in self.pluginFolderList):
                 warn(f"Plugin \"{pluginData['visualName']}\" was not loaded because it depends on plugin \"{dependency}\" which is not found.")
                 return
             else:
                 dependencyPluginFold = None
-                for p in self.pluginsFolder.iterdir():
+                for p in self.pluginFolderList:
                     if getJsonData(p / "config.json")['name'] == dependency:
                         dependencyPluginFold = p
 
@@ -72,7 +85,11 @@ class PluginManager:
 
         # Load the plugin
         try:
-            module = __import__(f'plugins.{folderName}.plugin', fromlist=['Plugin'])
+            path_parts = list(pluginFolder.parts)
+            plugins_index = path_parts.index("plugins")
+            relative_path_parts = ".".join(path_parts[plugins_index:]) + ".plugin"
+
+            module = __import__(relative_path_parts, fromlist=['Plugin'])
             pluginClass = getattr(module, 'Plugin')
             
             plugin = pluginClass(self.api)
@@ -84,7 +101,9 @@ class PluginManager:
             self.plugins[folderName] = plugin
             success(f"Plugin \"{pluginData['visualName']}\" was successfully loaded.")
         except Exception as e:
-            error(f"Failed to load plugin \"{pluginData['visualName']}\": {e}")
+            error(f"Failed to load plugin \"{pluginData['visualName']}\"")
+            error(traceback.format_exc())
+        
 
     def startPlugins(self):
         info("Starting plugins.")

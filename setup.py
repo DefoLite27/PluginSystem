@@ -4,6 +4,7 @@ import sys
 def install_packages():
     required_packages = [
         'json5',
+        "colorama"
     ]
     for package in required_packages:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])

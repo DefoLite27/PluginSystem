@@ -12,5 +12,3 @@ if __name__ == "__main__":
     pluginMan.loadPlugins()
     pluginMan.startPlugins()
 
-
-# Standartisize plugin option system

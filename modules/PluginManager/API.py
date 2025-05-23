@@ -52,9 +52,7 @@ class API:
             self.events[name]["event"].Fire(*args)
 
     def _onPluginRemove(self, pluginName):
-        for name, data in list(self.pluginFunctions.items()):
-            if data["plugin"] == pluginName:
-                del self.pluginFunctions[name]
+        return
 
     def changePluginOptions(self, plugin, optionName, kwargs):
         if not optionName in plugin.configData["options"]:
