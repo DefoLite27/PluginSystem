@@ -41,8 +41,7 @@ class PluginManager:
 
     def _loadPlugin(self, pluginFolder):
         pluginData = getJsonData(pluginFolder / 'config.json')
-        folderName = pluginFolder.name
-
+        
         # Checks
         if not pluginData['enabled']:
             warn(f"Plugin \"{pluginData['visualName']}\" was not loaded because it's disabled.")
@@ -53,8 +52,8 @@ class PluginManager:
                  f"(API: {self.managerData['version']}, Plugin: {pluginData['loaderVersion']})")
             return
 
-        if folderName in self.plugins:
-            warn(f"Plugin \"{pluginData['visualName']}\" was not loaded because it's already loaded.")
+        if pluginData['name'] in self.plugins:
+            warn(f"Plugin \"{pluginData['visualName']}\" was not loaded because it's already loaded. Most likely because there is a dublicate of that plugin.")
             return
         
         dependecies = pluginData['dependencies']
@@ -93,12 +92,13 @@ class PluginManager:
             pluginClass = getattr(module, 'Plugin')
             
             plugin = pluginClass(self.api)
+            self.plugins[pluginData['name']] = plugin
+
             plugin.currentPath = pluginFolder
             plugin.init()
             plugin.onLoad()
             plugin.loaded = True
 
-            self.plugins[folderName] = plugin
             success(f"Plugin \"{pluginData['visualName']}\" was successfully loaded.")
         except Exception as e:
             error(f"Failed to load plugin \"{pluginData['visualName']}\"")
@@ -168,6 +168,8 @@ class PluginManager:
 
         for plugin in toRemove:
             self._removePlugin(plugin)
+        if len(toRemove) == 0:
+            success("Nothing removed.")
 
     def getPlugin(self, name):
         """

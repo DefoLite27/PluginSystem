@@ -11,10 +11,12 @@ class Plugin(Plugin):
         self.API.changePluginOptions(self.API.getPlugin("secondTemplatePlugin"), "option2", {"value": "Option 2"})
     
     def optionsChanged(self, optionName, optionArgs):
-        print(optionName, optionArgs)
+        pass
+        # print(optionName, optionArgs)
 
     def testFunction(self):
-        print("Test function from secondTemplatePlugin")
+        pass
+        #print("Test function from secondTemplatePlugin")
 
     def onRemove(self):
         pass

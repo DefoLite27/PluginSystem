@@ -1,7 +1,7 @@
 {
     "loaderVersion": 1.1,
-    "name": "secondTemplatePlugin",
-    "visualName": "Template Plugin2",
+    "name": "secondTemplatePlugin2",
+    "visualName": "Template Plugin3",
     "version": 1.0,
     "dependencies": {
        
