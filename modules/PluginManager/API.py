@@ -7,6 +7,7 @@ class API:
     def __init__(self, pluginManager):
         self.pluginManager = pluginManager
         self.events = {}
+        self.dataSpace = {} # This is a space for plugins to store data that can be accessed by other plugins.
 
         pluginManager.events["OnPluginRemove"].Connect(self._onPluginRemove)
 
